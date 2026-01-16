@@ -81,3 +81,20 @@ class CameraCreateRequest(BaseModel):
     latitude: Optional[float] = Field(None, description="纬度 (可选)")
     longitude: Optional[float] = Field(None, description="经度 (可选)")
     remark: Optional[str] = Field(None, description="备注信息 (可选)")
+
+class PTZDirection(str, Enum):
+    UP = "up"
+    DOWN = "down"
+    LEFT = "left"
+    RIGHT = "right"
+
+class PTZControlRequest(BaseModel):
+    """
+    前端控制云台的请求模型
+    direction: 上下左右
+    speed: 可选速度 [0.1, 1.0]
+    duration: 持续时间秒 (默认 0.5s)
+    """
+    direction: PTZDirection
+    speed: Optional[float] = Field(0.5, ge=0.1, le=1.0)
+    duration: Optional[float] = Field(0.5, ge=0.1, le=5.0)

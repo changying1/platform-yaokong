@@ -84,6 +84,29 @@ export async function updateVideo(id: number, videoData: VideoUpdate): Promise<V
   return response.json();
 }
 
+/** 控制摄像头云台方向 */
+export async function ptzControl(
+  videoId: number,
+  direction: 'up' | 'down' | 'left' | 'right',
+  speed: number = 0.5,
+  duration: number = 0.5
+): Promise<{ status: string }> {
+  const response = await fetch(`${API_BASE_URL}/video/ptz/${videoId}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ direction, speed, duration }),
+  });
+  if (!response.ok) {
+    let msg = 'Failed to control PTZ';
+    try {
+      const err = await response.json();
+      msg = err.detail || msg;
+    } catch {}
+    throw new Error(msg);
+  }
+  return response.json();
+}
+
 /** 删除指定的视频设备 */
 export async function deleteVideo(videoId: number): Promise<{ status: string }> {
   const response = await fetch(`${API_BASE_URL}/video/${videoId}`, {
@@ -138,6 +161,43 @@ export async function addCameraViaRTSP(cameraData: {
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.detail || 'Failed to add camera via RTSP');
+  }
+  return response.json();
+}
+/** 持续云台移动-开始（按下时调用） */
+export async function ptzStartControl(
+  videoId: number,
+  direction: 'up' | 'down' | 'left' | 'right',
+  speed: number = 0.5,
+): Promise<{ status: string }> {
+  const response = await fetch(`${API_BASE_URL}/video/ptz/${videoId}/start`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ direction, speed, duration: 1 }),
+  });
+  if (!response.ok) {
+    let msg = 'Failed to start PTZ';
+    try {
+      const err = await response.json();
+      msg = err.detail || msg;
+    } catch {}
+    throw new Error(msg);
+  }
+  return response.json();
+}
+
+/** 持续云台移动-停止（松开时调用） */
+export async function ptzStopControl(videoId: number): Promise<{ status: string }> {
+  const response = await fetch(`${API_BASE_URL}/video/ptz/${videoId}/stop`, {
+    method: 'POST',
+  });
+  if (!response.ok) {
+    let msg = 'Failed to stop PTZ';
+    try {
+      const err = await response.json();
+      msg = err.detail || msg;
+    } catch {}
+    throw new Error(msg);
   }
   return response.json();
 }

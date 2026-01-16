@@ -5,6 +5,7 @@ export enum MenuKey {
   FENCE = 'fence',
   GROUP_CALL = 'group_call',
   ALARM = 'alarm',
+  DEVICE = 'device',
   SETTINGS = 'settings',
 }
 

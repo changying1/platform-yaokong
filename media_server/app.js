@@ -1,9 +1,8 @@
-
 const NodeMediaServer = require('node-media-server');
 
 const config = {
   rtmp: {
-    port: 1935,
+    port: 19350,
     chunk_size: 60000,
     gop_cache: true,
     ping: 30,
@@ -20,7 +19,7 @@ const config = {
     api_pass: '123456'
   },
   relay: {
-    ffmpeg: 'D:/ffmpeg-8.0.1-essentials_build/bin/ffmpeg.exe',
+    ffmpeg: 'C:/Users/DELL/Desktop/platform-shipin-yaokong/platform-shipin-yaokong/ffmpeg-8.0.1-essentials_build/bin/ffmpeg.exe',
     tasks: []
   }
 };

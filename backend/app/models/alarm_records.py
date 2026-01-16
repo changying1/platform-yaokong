@@ -14,6 +14,10 @@ class AlarmRecord(Base):
     status = Column(String(20), default="pending") # pending, resolved
     handled_at = Column(DateTime, nullable=True)
     location = Column(String(100), nullable=True) # e.g. "Zone A"
+
+    recording_path = Column(String(255), nullable=True) 
+    recording_status = Column(String(20), default="pending")
+    recording_error = Column(String(255), nullable=True)
     
     # Relationships
     device_id = Column(String(50), ForeignKey("devices.id"))

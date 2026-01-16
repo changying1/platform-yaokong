@@ -1,5 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
+from pydantic import BaseModel
+from datetime import datetime
+from typing import Optional
 
 class AlarmCreate(BaseModel):
     device_id: str
@@ -19,6 +22,9 @@ class AlarmOut(AlarmCreate):
     id: int
     timestamp: datetime
     handled_at: datetime | None = None
+    recording_path: Optional[str] = None
+    recording_status: str = "pending"
+    recording_error: Optional[str] = None
     
     class Config:
         from_attributes=True

@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List
 from app.core.database import get_db
 # 统一使用 video_schema 以匹配模块结构
-from app.schemas.video_schema import VideoCreate, VideoOut, VideoUpdate, CameraCreateRequest
+from app.schemas.video_schema import VideoCreate, VideoOut, VideoUpdate, CameraCreateRequest, PTZControlRequest
 from app.services.video_service import VideoService
 import cv2
 import time
@@ -36,6 +36,11 @@ def create_video(video: VideoCreate, db: Session = Depends(get_db)):
         return service.create_video(db, video)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        # 添加通用异常捕获，防止任何未预料的错误（如数据库连接失败、模型字段不匹配等）导致服务器崩溃并返回HTML
+        # 在生产环境中，应该使用更精细的日志记录
+        print(f"An unexpected error occurred: {e}") # 临时用于调试
+        raise HTTPException(status_code=500, detail="An internal server error occurred while creating the video.")
 
 @router.put("/{video_id}", response_model=VideoOut)
 def update_video(video_id: int, video: VideoUpdate, db: Session = Depends(get_db)):
@@ -112,3 +117,42 @@ def get_video_mjpeg(video_id: int, db: Session = Depends(get_db)):
     if not url:
         raise HTTPException(status_code=404, detail="Stream URL not found or device offline")
     return StreamingResponse(_mjpeg_frame_generator(url), media_type="multipart/x-mixed-replace; boundary=frame")
+
+@router.post("/ptz/{video_id}")
+def ptz_control(video_id: int, body: PTZControlRequest, db: Session = Depends(get_db)):
+    """云台控制接口，前端发送方向和速度，然后通过 ONVIF 控制摄像头"""
+    try:
+        # 添加日志
+        import logging
+        logger_temp = logging.getLogger("ptz_control")
+        logger_temp.info(f"收到PTZ请求 - video_id: {video_id}, direction: {body.direction}, direction.value: {body.direction.value}, speed: {body.speed}, duration: {body.duration}")
+        
+        service.ptz_move(db, video_id, body.direction.value, body.speed or 0.5, body.duration or 0.5)
+        return {"status": "ok"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PTZ 控制失败: {e}")
+
+@router.post("/ptz/{video_id}/start")
+def ptz_start(video_id: int, body: PTZControlRequest, db: Session = Depends(get_db)):
+    """云台持续移动（按下开始），前端按键按下时调用"""
+    try:
+        service.ptz_start_move(db, video_id, body.direction.value, body.speed or 0.5)
+        return {"status": "ok"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PTZ 启动失败: {e}")
+
+
+@router.post("/ptz/{video_id}/stop")
+def ptz_stop(video_id: int, db: Session = Depends(get_db)):
+    """云台停止移动（松开停止），前端按键松开时调用"""
+    try:
+        service.ptz_stop_move(db, video_id)
+        return {"status": "ok"}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PTZ 停止失败: {e}")

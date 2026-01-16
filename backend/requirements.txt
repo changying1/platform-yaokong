@@ -1,4 +1,4 @@
-fastapi
+﻿fastapi
 uvicorn
 sqlalchemy
 pydantic
@@ -7,3 +7,4 @@ pymysql
 loguru
 requests
 opencv-python
+onvif-zeep

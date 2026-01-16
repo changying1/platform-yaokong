@@ -17,11 +17,14 @@ const apiClient = axios.create({
 export interface ApiDevice {
   id: string;
   device_name: string;
+  device_type: string;
   ip_address: string;
+  port: number;
   is_online: boolean;
   stream_url?: string | null;
   last_latitude?: number | null;
   last_longitude?: number | null;
+  owner_id?: number | null;
 }
 
 // 导出具体的数据库操作接口
