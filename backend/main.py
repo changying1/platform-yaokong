@@ -12,6 +12,7 @@ from app.controllers import (
     alarm_controller,
     call_controller,
     dashboard_controller,
+    auth_controller,
 )
 from app.utils.logger import get_logger
 
@@ -56,6 +57,7 @@ app.include_router(fence_controller.router)
 app.include_router(alarm_controller.router)
 app.include_router(call_controller.router)
 app.include_router(dashboard_controller.router)
+app.include_router(auth_controller.router)
 
 @app.get("/")
 def root():

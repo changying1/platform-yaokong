@@ -1,6 +1,6 @@
-import React from 'react';
-import { Filter, AlertTriangle, Search } from 'lucide-react';
-import { AlarmStatusFilter, AlarmLevelFilter } from '../types';
+import React from "react";
+import { Filter, AlertTriangle, Search } from "lucide-react";
+import { AlarmStatusFilter, AlarmLevelFilter } from "../types";
 
 interface FilterBarProps {
   status: AlarmStatusFilter;
@@ -17,15 +17,33 @@ export const AlarmFilterBar: React.FC<FilterBarProps> = ({
   searchTerm,
   onStatusChange,
   onLevelChange,
-  onSearchChange
+  onSearchChange,
 }) => {
+  const pillStyle: React.CSSProperties = {
+    background:
+      "linear-gradient(180deg, rgba(239,246,255,0.95), rgba(219,234,254,0.90))",
+    border: "1px solid rgba(147,197,253,0.72)",
+    boxShadow: "0 12px 30px rgba(7,20,63,0.20)",
+    backdropFilter: "blur(10px)",
+  };
+
+  const selectStyle: React.CSSProperties = {
+    background: "transparent",
+    fontSize: 13,
+    fontWeight: 900 as any,
+    color: "#0b3a82",
+    outline: "none",
+    border: "none",
+    paddingRight: 14,
+  };
+
   return (
     <div className="flex justify-between items-center mb-6 gap-4">
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-200 shadow-sm">
-          <Filter size={16} className="text-gray-400 ml-2" />
-          <select 
-            className="bg-transparent text-sm font-semibold text-gray-700 outline-none border-none pr-4"
+        <div className="flex items-center gap-2 p-1.5 rounded-xl" style={pillStyle}>
+          <Filter size={16} color="rgba(11,58,130,0.55)" className="ml-2" />
+          <select
+            style={selectStyle}
             value={status}
             onChange={(e) => onStatusChange(e.target.value as AlarmStatusFilter)}
           >
@@ -34,11 +52,11 @@ export const AlarmFilterBar: React.FC<FilterBarProps> = ({
             <option value="resolved">已处置</option>
           </select>
         </div>
-        
-        <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-xl border border-gray-200 shadow-sm">
-          <AlertTriangle size={16} className="text-gray-400 ml-2" />
-          <select 
-            className="bg-transparent text-sm font-semibold text-gray-700 outline-none border-none pr-4"
+
+        <div className="flex items-center gap-2 p-1.5 rounded-xl" style={pillStyle}>
+          <AlertTriangle size={16} color="rgba(11,58,130,0.55)" className="ml-2" />
+          <select
+            style={selectStyle}
             value={level}
             onChange={(e) => onLevelChange(e.target.value as AlarmLevelFilter)}
           >
@@ -51,14 +69,25 @@ export const AlarmFilterBar: React.FC<FilterBarProps> = ({
       </div>
 
       <div className="relative flex-1 max-w-md group">
-        <input 
-          type="text" 
-          placeholder="搜索报警人、设备或位置..." 
-          className="w-full bg-gray-50 border border-gray-200 rounded-xl pl-11 pr-4 py-2.5 text-sm text-gray-800 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/10 outline-none transition-all shadow-sm"
+        <input
+          type="text"
+          placeholder="搜索报警人、设备或位置..."
           value={searchTerm}
           onChange={(e) => onSearchChange(e.target.value)}
+          className="w-full rounded-xl pl-11 pr-4 py-2.5 text-sm outline-none transition-all"
+          style={{
+            background:
+              "linear-gradient(180deg, rgba(239,246,255,0.95), rgba(219,234,254,0.90))",
+            border: "1px solid rgba(147,197,253,0.72)",
+            boxShadow: "0 12px 30px rgba(7,20,63,0.20)",
+            color: "#0b3a82",
+          }}
         />
-        <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
+        <Search
+          size={18}
+          className="absolute left-4 top-1/2 -translate-y-1/2 transition-colors"
+          color="rgba(11,58,130,0.55)"
+        />
       </div>
     </div>
   );

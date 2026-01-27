@@ -54,7 +54,7 @@ export default function Dashboard() {
   // 你现在的界面没有省份筛选的话，先固定全部
   const selectedProvince = "全部";
 
-  // 顶部统计
+  // 顶部统计（⚠️不改）
   useEffect(() => {
     (async () => {
       try {
@@ -75,11 +75,23 @@ export default function Dashboard() {
     })();
   }, []);
 
-  // ✅ 分公司列表
+  // ✅ 分公司列表（✅只改这里：加总部/分公司 headers，其余不动）
   useEffect(() => {
     (async () => {
       try {
-        const res = await fetch("/api/dashboard/branches");
+        // 从 localStorage 读取登录后的身份信息（App.tsx 已保存 role/department_id/username）
+        const role = (localStorage.getItem("role") || "HQ").toUpperCase();
+        const departmentId = localStorage.getItem("department_id") || "";
+        const username = localStorage.getItem("username") || "";
+
+        const res = await fetch("/api/dashboard/branches", {
+          headers: {
+            "x-role": role,
+            "x-department-id": departmentId,
+            "x-username": username,
+          },
+        });
+
         if (!res.ok) throw new Error(`branches http ${res.status}`);
         const data = await res.json();
         setBranches(Array.isArray(data) ? data : []);
@@ -91,8 +103,7 @@ export default function Dashboard() {
   }, []);
 
   // ✅ 让地图整体略向右（经度 105 左右），消除右侧留白
-const selectedCenter = useMemo(() => [108, 35] as [number, number], []);
-
+  const selectedCenter = useMemo(() => [108, 35] as [number, number], []);
 
   const mapOption = useMemo(() => {
     const visibleBranches =
@@ -115,9 +126,10 @@ const selectedCenter = useMemo(() => [108, 35] as [number, number], []);
         value: [b.coord![0], b.coord![1], 1], // [lng, lat, weight]
       }));
 
-    const MAP_AREA = "#3b78a6";
-    const MAP_AREA_HL = "#5a96c8";
-    const MAP_AREA_HOVER = "#6aa2cf";
+      const MAP_AREA = "#4A95D6";       // 默认省份更亮
+      const MAP_AREA_HL = "#71B7F3";    // 高亮省份更亮
+      const MAP_AREA_HOVER = "#86C6FF"; // hover 更亮
+
 
     return {
       backgroundColor: "transparent",
@@ -164,40 +176,51 @@ const selectedCenter = useMemo(() => [108, 35] as [number, number], []);
 
         itemStyle: {
           areaColor: MAP_AREA,
-          borderColor: "#3b82f6",
-          borderWidth: 1.2,
-          shadowColor: "rgba(59,130,246,0.25)",
-          shadowBlur: 18,
+
+          // ✅ 改成同色系边界，避免割裂
+          borderColor: "rgba(30, 90, 160, 0.48)", // 深蓝但透明
+          borderWidth: 1.05,                      // 细一点
+          borderType: "solid",
+
+          // ✅ 把“发光/阴影”减弱，否则会显得一块块分割
+          shadowColor: "rgba(59,130,246,0.12)",
+          shadowBlur: 6,
         },
 
         label: {
           show: true,
-          color: "rgba(255,255,255,0.72)",
-          fontSize: 11,
+          color: "#ffffff",      // 纯白，对比度最高
+          fontSize: 12,          // 稍微大一点
+          fontWeight: "bold",    // 加粗
+          textBorderColor: "rgba(0,0,0,0.35)", // 黑色描边
+          textBorderWidth: 2,    // 关键：让字“立起来”
         },
 
         emphasis: {
           itemStyle: {
             areaColor: MAP_AREA_HOVER,
-            borderColor: "#60a5fa",
-            borderWidth: 1.5,
-            shadowColor: "rgba(96,165,250,0.55)",
-            shadowBlur: 22,
+            borderColor: "rgba(30, 90, 160, 0.75)",
+            borderWidth: 1.4,
+            shadowColor: "rgba(59,130,246,0.18)",
+            shadowBlur: 8,
           },
-          label: {
-            color: "rgba(255,255,255,0.92)",
-            fontWeight: "bold",
-          },
+        label: {
+          color: "#ffffff",
+          fontSize: 13,
+          fontWeight: "bolder",
+          textBorderColor: "rgba(0,0,0,0.45)",
+          textBorderWidth: 3,
         },
+      },
 
         regions: highlighted.map((name) => ({
           name,
           itemStyle: {
             areaColor: MAP_AREA_HL,
-            borderColor: "#38bdf8",
-            borderWidth: 2,
-            shadowColor: "rgba(56,189,248,0.55)",
-            shadowBlur: 24,
+            borderColor: "rgba(30, 90, 160, 0.80)",
+            borderWidth: 1.6,
+            shadowColor: "rgba(56,189,248,0.20)",
+            shadowBlur: 10,
           },
           label: {
             show: true,
@@ -311,7 +334,9 @@ const selectedCenter = useMemo(() => [108, 35] as [number, number], []);
             <div style={styles.cardGlowRed} />
             <div style={styles.cardLabel}>报警数量（今日）</div>
             <div style={styles.cardValueRed}>{summary.alarmCount}</div>
-            <div style={styles.cardHint}>来源：alarm_records · DATE(timestamp)=CURDATE()</div>
+            <div style={styles.cardHint}>
+              来源：alarm_records · DATE(timestamp)=CURDATE()
+            </div>
           </div>
 
           <div style={styles.card}>
@@ -425,22 +450,23 @@ const styles: Record<string, React.CSSProperties> = {
   page: {
     minHeight: "100vh",
     background:
-      "radial-gradient(1200px 600px at 20% 0%, rgba(59,130,246,0.14), transparent 60%)," +
-      "radial-gradient(1000px 500px at 90% 10%, rgba(34,197,94,0.10), transparent 55%)," +
-      "linear-gradient(180deg, #f6f8ff 0%, #f5f7fb 60%, #f4f6fb 100%)",
-    padding: 22,
+      "radial-gradient(1200px 720px at 12% -6%, rgba(147,197,253,0.28), transparent 62%)," +
+      "radial-gradient(1000px 620px at 96% 6%, rgba(59,130,246,0.22), transparent 60%)," +
+      "radial-gradient(900px 560px at 62% 96%, rgba(56,189,248,0.16), transparent 64%)," +
+      "linear-gradient(180deg, #0b4db3 0%, #0a3f99 42%, #0a2f73 100%)",
+    padding: 0,
     boxSizing: "border-box",
   },
 
   container: {
-     width: "100%",
-     maxWidth: "none",        // ✅ 取消宽度限制
-     margin: "0 auto",
-     paddingLeft: 12,         // ✅ 左右只留一点空隙
-     paddingRight: 12,
-     display: "flex",
-     flexDirection: "column",
-     gap: 14,
+    width: "100%",
+    maxWidth: "none",
+    margin: "0 auto",
+    paddingLeft: 12,
+    paddingRight: 12,
+    display: "flex",
+    flexDirection: "column",
+    gap: 14,
   },
 
   headerRow: {
@@ -448,118 +474,129 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "14px 16px",
-    borderRadius: 16,
-    background: "rgba(255,255,255,0.78)",
-    border: "1px solid rgba(226,232,240,0.85)",
-    boxShadow: "0 12px 30px rgba(15,23,42,0.06)",
-    backdropFilter: "blur(10px)",
+    borderRadius: 18,
+    background:
+      "linear-gradient(180deg, rgba(15,78,190,0.78), rgba(12,63,156,0.68))",
+    border: "1px solid rgba(191,219,254,0.42)",
+    boxShadow:
+      "0 24px 70px rgba(7,20,63,0.45), 0 1px 0 rgba(191,219,254,0.18) inset",
+    backdropFilter: "blur(12px)",
   },
 
   title: {
-    fontSize: 22,
-    fontWeight: 900,
-    letterSpacing: 0.3,
-    color: "#0f172a",
+    fontSize: "clamp(18px, 2.2vw, 24px)",
+    fontWeight: 950 as any,
+    letterSpacing: 0.2,
+    color: "#e8f1ff",
   },
 
   subTitle: {
-    marginTop: 4,
+    marginTop: 6,
     fontSize: 12,
-    color: "#64748b",
+    color: "#c7dbff",
+    lineHeight: 1.4,
   },
 
   headerRight: { display: "flex", gap: 8, alignItems: "center" },
 
   pill: {
-    background: "rgba(255,255,255,0.9)",
-    border: "1px solid rgba(226,232,240,0.9)",
+    background:
+      "linear-gradient(180deg, rgba(239,246,255,0.95), rgba(219,234,254,0.90))",
+    border: "1px solid rgba(147,197,253,0.72)",
     borderRadius: 999,
     padding: "8px 12px",
     fontSize: 12,
-    color: "#334155",
-    boxShadow: "0 6px 16px rgba(15,23,42,0.04)",
+    color: "#0b3a82",
+    boxShadow: "0 12px 30px rgba(7,20,63,0.25)",
+    backdropFilter: "blur(10px)",
+    whiteSpace: "nowrap",
   },
 
   cardsRow3: {
     display: "grid",
-    gridTemplateColumns: "repeat(3, 1fr)",
+    gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
     gap: 12,
   },
 
   card: {
-    background: "rgba(255,255,255,0.88)",
-    borderRadius: 16,
-    border: "1px solid rgba(226,232,240,0.9)",
+    background:
+      "linear-gradient(180deg, rgba(14,78,191,0.82), rgba(12,66,168,0.74))",
+    borderRadius: 18,
+    border: "1px solid rgba(191,219,254,0.38)",
     padding: 16,
-    boxShadow: "0 14px 36px rgba(15,23,42,0.08)",
-    backdropFilter: "blur(10px)",
+    boxShadow:
+      "0 28px 80px rgba(7,20,63,0.42), 0 1px 0 rgba(191,219,254,0.16) inset",
+    backdropFilter: "blur(12px)",
     position: "relative",
     overflow: "hidden",
   },
 
   cardGlowBlue: {
     position: "absolute",
-    inset: -80,
+    inset: -90,
     background:
-      "radial-gradient(circle at 30% 20%, rgba(59,130,246,0.18), transparent 55%)",
+      "radial-gradient(circle at 28% 18%, rgba(147,197,253,0.32), transparent 60%)",
     pointerEvents: "none",
+    filter: "blur(0px)",
   },
   cardGlowGreen: {
     position: "absolute",
-    inset: -80,
+    inset: -90,
     background:
-      "radial-gradient(circle at 30% 20%, rgba(34,197,94,0.18), transparent 55%)",
+      "radial-gradient(circle at 28% 18%, rgba(59,130,246,0.28), transparent 60%)",
     pointerEvents: "none",
   },
   cardGlowRed: {
     position: "absolute",
-    inset: -80,
+    inset: -90,
     background:
-      "radial-gradient(circle at 30% 20%, rgba(239,68,68,0.18), transparent 55%)",
+      "radial-gradient(circle at 28% 18%, rgba(56,189,248,0.26), transparent 60%)",
     pointerEvents: "none",
   },
 
   cardLabel: {
-    fontSize: 13,
-    color: "#64748b",
+    fontSize: 12,
+    color: "#dbeafe",
     marginBottom: 10,
     position: "relative",
     zIndex: 1,
+    letterSpacing: 0.2,
   },
 
   cardValue: {
-    fontSize: 32,
-    fontWeight: 900,
-    color: "#0f172a",
+    fontSize: "clamp(28px, 3.2vw, 36px)",
+    fontWeight: 950 as any,
+    color: "#ffffff",
     lineHeight: 1,
     position: "relative",
     zIndex: 1,
   },
 
   cardValueBlue: {
-    fontSize: 32,
-    fontWeight: 900,
-    color: "#2563eb",
+    fontSize: "clamp(28px, 3.2vw, 36px)",
+    fontWeight: 950 as any,
+    color: "#bfdbfe",
     lineHeight: 1,
     position: "relative",
     zIndex: 1,
   },
 
   cardValueRed: {
-    fontSize: 32,
-    fontWeight: 900,
-    color: "#dc2626",
+    fontSize: "clamp(28px, 3.2vw, 36px)",
+    fontWeight: 950 as any,
+    color: "#fecaca",
     lineHeight: 1,
     position: "relative",
     zIndex: 1,
   },
 
   cardHint: {
-    marginTop: 10,
+    marginTop: 12,
     fontSize: 11,
-    color: "#94a3b8",
+    color: "rgba(219,234,254,0.82)",
     position: "relative",
     zIndex: 1,
+    lineHeight: 1.35,
   },
 
   middleRow: {
@@ -571,12 +608,14 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   mapCard: {
-    background: "rgba(255,255,255,0.88)",
-    borderRadius: 18,
-    border: "1px solid rgba(226,232,240,0.9)",
+    background:
+      "linear-gradient(180deg, rgba(13,74,186,0.84), rgba(11,60,150,0.76))",
+    borderRadius: 20,
+    border: "1px solid rgba(191,219,254,0.38)",
     padding: 16,
-    boxShadow: "0 18px 46px rgba(15,23,42,0.10)",
-    backdropFilter: "blur(10px)",
+    boxShadow:
+      "0 30px 90px rgba(7,20,63,0.46), 0 1px 0 rgba(191,219,254,0.16) inset",
+    backdropFilter: "blur(12px)",
     minHeight: 0,
     display: "flex",
     flexDirection: "column",
@@ -584,8 +623,8 @@ const styles: Record<string, React.CSSProperties> = {
 
   mapTitle: {
     fontSize: 14,
-    fontWeight: 900,
-    color: "#0f172a",
+    fontWeight: 950 as any,
+    color: "#e8f1ff",
     display: "flex",
     alignItems: "center",
     gap: 10,
@@ -596,43 +635,47 @@ const styles: Record<string, React.CSSProperties> = {
     width: 10,
     height: 10,
     borderRadius: 999,
-    background: "#3b82f6",
+    background: "#93c5fd",
     display: "inline-block",
-    boxShadow: "0 0 0 6px rgba(59,130,246,0.15)",
+    boxShadow: "0 0 0 7px rgba(191,219,254,0.28)",
   },
 
   mapMeta: {
     marginLeft: 6,
     fontSize: 12,
-    color: "#64748b",
-    fontWeight: 600,
+    color: "#c7dbff",
+    fontWeight: 650 as any,
   },
 
   mapWrap: {
     flex: 1,
     marginTop: 12,
-    minHeight: 520,
+    minHeight: 540,
     position: "relative",
-    borderRadius: 16,
+    borderRadius: 18,
     overflow: "hidden",
-    border: "1px solid rgba(226,232,240,0.9)",
+    border: "1px solid rgba(191,219,254,0.42)",
     background:
-      "radial-gradient(900px 400px at 30% 0%, rgba(59,130,246,0.08), transparent 60%)," +
-      "linear-gradient(180deg, rgba(255,255,255,0.75), rgba(255,255,255,0.55))",
+      "radial-gradient(900px 460px at 24% 0%, rgba(147,197,253,0.28), transparent 64%)," +
+      "radial-gradient(900px 460px at 88% 18%, rgba(59,130,246,0.24), transparent 62%)," +
+      "linear-gradient(180deg, rgba(12,64,166,0.64), rgba(10,47,115,0.72))",
+    boxShadow: "0 1px 0 rgba(191,219,254,0.18) inset",
   },
 
   popup: {
     position: "absolute",
     right: 16,
     top: 16,
-    width: 360,
-    background: "rgba(255,255,255,0.92)",
-    border: "1px solid rgba(226,232,240,0.9)",
-    borderRadius: 16,
-    boxShadow: "0 24px 60px rgba(15,23,42,0.18)",
+    width: "min(380px, calc(100% - 32px))",
+    background:
+      "linear-gradient(180deg, rgba(239,246,255,0.97), rgba(219,234,254,0.92))",
+    border: "1px solid rgba(147,197,253,0.62)",
+    borderRadius: 18,
+    boxShadow:
+      "0 34px 90px rgba(15,23,42,0.22), 0 1px 0 rgba(255,255,255,0.85) inset",
     overflow: "hidden",
     zIndex: 10,
-    backdropFilter: "blur(12px)",
+    backdropFilter: "blur(14px)",
   },
 
   popupHeader: {
@@ -640,38 +683,45 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: "center",
     justifyContent: "space-between",
     padding: "12px 14px",
-    borderBottom: "1px solid rgba(226,232,240,0.9)",
+    borderBottom: "1px solid rgba(147,197,253,0.52)",
     background:
-      "linear-gradient(180deg, rgba(59,130,246,0.10), rgba(255,255,255,0.0))",
+      "radial-gradient(520px 120px at 20% 0%, rgba(59,130,246,0.22), transparent 62%)," +
+      "linear-gradient(180deg, rgba(219,234,254,0.82), rgba(219,234,254,0.20))",
   },
 
   popupTitle: {
     fontSize: 14,
-    fontWeight: 900,
-    color: "#0f172a",
+    fontWeight: 950 as any,
+    color: "#0b3a82",
+    letterSpacing: 0.2,
   },
 
   popupClose: {
-    width: 30,
-    height: 30,
-    borderRadius: 10,
-    border: "1px solid rgba(226,232,240,0.9)",
-    background: "rgba(255,255,255,0.9)",
+    width: 32,
+    height: 32,
+    borderRadius: 12,
+    border: "1px solid rgba(147,197,253,0.62)",
+    background:
+      "linear-gradient(180deg, rgba(239,246,255,0.96), rgba(219,234,254,0.90))",
     cursor: "pointer",
     fontSize: 18,
-    lineHeight: "26px",
-    color: "#334155",
-    boxShadow: "0 10px 20px rgba(15,23,42,0.06)",
+    lineHeight: "28px",
+    color: "#0b3a82",
+    boxShadow: "0 12px 26px rgba(7,20,63,0.18)",
   },
 
-  popupBody: { padding: 14 },
+  popupBody: {
+    padding: 14,
+    maxHeight: "min(520px, calc(100vh - 160px))",
+    overflowY: "auto",
+  },
 
   popupRow: {
     display: "flex",
     gap: 10,
     marginBottom: 10,
     paddingBottom: 10,
-    borderBottom: "1px dashed rgba(226,232,240,0.9)",
+    borderBottom: "1px dashed rgba(147,197,253,0.55)",
   },
 
   popupLabel: {
@@ -682,9 +732,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   popupValue: {
-    color: "#0f172a",
+    color: "#0b1220",
     fontSize: 12,
-    lineHeight: 1.6,
+    lineHeight: 1.65,
     wordBreak: "break-word",
   },
 };

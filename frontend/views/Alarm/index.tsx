@@ -1,8 +1,8 @@
-import React from 'react';
-import { AlarmStats } from './components/AlarmStats';
-import { AlarmFilterBar } from './components/AlarmFilterBar';
-import { AlarmTable } from './components/AlarmTable';
-import { useAlarms } from './hooks/useAlarms';
+import React from "react";
+import { AlarmStats } from "./components/AlarmStats";
+import { AlarmFilterBar } from "./components/AlarmFilterBar";
+import { AlarmTable } from "./components/AlarmTable";
+import { useAlarms } from "./hooks/useAlarms";
 
 export default function AlarmRecords() {
   const {
@@ -14,13 +14,13 @@ export default function AlarmRecords() {
     setLevelFilter,
     searchTerm,
     setSearchTerm,
-    actions
+    actions,
   } = useAlarms();
 
   return (
     <div className="h-full flex flex-col gap-6 animate-in fade-in duration-500">
       {/* Statistics Section */}
-      <AlarmStats 
+      <AlarmStats
         total={stats.total}
         pending={stats.pending}
         resolved={stats.resolved}
@@ -28,15 +28,44 @@ export default function AlarmRecords() {
       />
 
       {/* List Section */}
-      <div className="flex-1 bg-white border border-gray-200 rounded-[2rem] p-8 flex flex-col overflow-hidden shadow-sm">
+      <div
+        className="flex-1 rounded-[2rem] p-8 flex flex-col overflow-hidden"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(14,78,191,0.82), rgba(12,66,168,0.74))",
+          border: "1px solid rgba(191,219,254,0.38)",
+          boxShadow:
+            "0 30px 90px rgba(7,20,63,0.46), 0 1px 0 rgba(191,219,254,0.16) inset",
+          backdropFilter: "blur(12px)",
+        }}
+      >
         <header className="flex justify-between items-center mb-6">
-          <h2 className="text-xl font-black text-gray-800 tracking-tight">报警记录明细</h2>
-          <div className="text-xs font-bold text-gray-400 bg-gray-50 px-3 py-1.5 rounded-full border border-gray-100">
+          <div>
+            <h2 className="text-xl font-black tracking-tight text-[#e8f1ff]">
+              报警记录明细
+            </h2>
+            <div className="text-[11px] mt-1 text-[#c7dbff] font-semibold">
+              筛选 · 搜索 · 处置与删除
+            </div>
+          </div>
+
+          <div
+            className="text-xs font-black px-3 py-1.5 rounded-full"
+            style={{
+              color: "#0b3a82",
+              background:
+                "linear-gradient(180deg, rgba(239,246,255,0.95), rgba(219,234,254,0.90))",
+              border: "1px solid rgba(147,197,253,0.72)",
+              boxShadow: "0 12px 30px rgba(7,20,63,0.25)",
+              backdropFilter: "blur(10px)",
+              whiteSpace: "nowrap",
+            }}
+          >
             共 {alarms.length} 条符合条件
           </div>
         </header>
 
-        <AlarmFilterBar 
+        <AlarmFilterBar
           status={statusFilter}
           level={levelFilter}
           searchTerm={searchTerm}
@@ -45,7 +74,7 @@ export default function AlarmRecords() {
           onSearchChange={setSearchTerm}
         />
 
-        <AlarmTable 
+        <AlarmTable
           alarms={alarms}
           onResolve={actions.resolve}
           onDelete={actions.delete}
@@ -53,10 +82,21 @@ export default function AlarmRecords() {
         />
 
         {/* Footer info */}
-        <footer className="mt-6 pt-6 border-t border-gray-50 flex justify-between items-center text-[11px] font-bold text-gray-400">
+        <footer
+          className="mt-6 pt-6 flex justify-between items-center text-[11px] font-bold"
+          style={{
+            borderTop: "1px solid rgba(191,219,254,0.18)",
+            color: "rgba(199,219,255,0.82)",
+          }}
+        >
           <div className="flex gap-4">
-             <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-green-500"/> 实时同步开启</div>
-             <div className="flex items-center gap-1.5"><div className="w-1.5 h-1.5 rounded-full bg-blue-500"/> 每 30 秒自动刷新</div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-400" /> 实时同步开启
+            </div>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 rounded-full bg-sky-300" /> 每 30
+              秒自动刷新
+            </div>
           </div>
           <div>智能安全预警平台 V2.0</div>
         </footer>

@@ -1,3 +1,4 @@
+// ...existing code...
 import React, { useState, useEffect } from 'react';
 import { Play, Pause, Square, Download, Search } from 'lucide-react';
 import { MapContainer, TileLayer, Polyline, Marker, Popup } from 'react-leaflet';
@@ -81,46 +82,49 @@ export default function TrackPlayback() {
   };
 
   return (
-    <div className="h-full flex flex-col gap-4">
-      {/* Controls Bar */}
-      <div className="bg-white border border-gray-200 rounded-lg p-3 flex items-center justify-between">
+    <div
+      className="h-full flex flex-col gap-4 p-4 text-white"
+      style={{ background: 'linear-gradient(180deg, #0b66d1 0%, #0752b0 45%, #053a85 100%)' }}
+    >
+      {/* Controls Bar - 蓝色风 */}
+      <div className="bg-blue-900 border border-blue-800 rounded-lg p-3 flex items-center justify-between">
          <div className="flex items-center gap-4">
             <div className="flex items-center gap-2">
               <input 
                  type="text" 
                  placeholder="输入姓名或设备号" 
-                 className="bg-gray-50 border border-gray-300 rounded px-3 py-1.5 text-sm text-gray-800 outline-none focus:border-blue-500 w-64"
+                 className="bg-blue-800 border border-blue-700 rounded px-3 py-1.5 text-sm text-blue-50 outline-none focus:border-blue-400 w-64"
               />
-              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded text-sm flex items-center gap-1">
+              <button className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1.5 rounded text-sm flex items-center gap-1 shadow-md">
                  <Search size={14} /> 搜索
               </button>
             </div>
             
-            <div className="h-8 w-[1px] bg-gray-200 mx-2"></div>
+            <div className="h-8 w-[1px] bg-blue-800/60 mx-2"></div>
 
             <div className="flex items-center gap-2">
-               <span className="text-gray-600 text-sm">日期:</span>
-               <input type="date" className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-sm text-gray-800" defaultValue="2024-08-07" />
-               <span className="text-gray-400">-</span>
-               <input type="date" className="bg-gray-50 border border-gray-300 rounded px-2 py-1 text-sm text-gray-800" defaultValue="2024-08-07" />
+               <span className="text-blue-200 text-sm">日期:</span>
+               <input type="date" className="bg-blue-800 border border-blue-700 rounded px-2 py-1 text-sm text-blue-50" defaultValue="2024-08-07" />
+               <span className="text-blue-400">-</span>
+               <input type="date" className="bg-blue-800 border border-blue-700 rounded px-2 py-1 text-sm text-blue-50" defaultValue="2024-08-07" />
             </div>
          </div>
 
-         <button className="text-blue-600 text-sm hover:text-blue-500 flex items-center gap-1">
+         <button className="text-blue-100 text-sm hover:text-white flex items-center gap-1">
             <Download size={16} /> 导出Excel
          </button>
       </div>
 
       {/* Main Map */}
-      <div className="flex-1 border border-gray-200 rounded-lg relative">
-         <MapContainer center={[31.2324, 121.4757]} zoom={15} className="w-full h-full bg-gray-100">
+      <div className="flex-1 border border-blue-800 rounded-lg relative overflow-hidden" style={{ background: '#041836' }}>
+         <MapContainer center={[31.2324, 121.4757]} zoom={15} className="w-full h-full">
             <TileLayer
                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-               url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+               url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
             />
             <Polyline 
                positions={polylinePositions} 
-               pathOptions={{ color: '#0ea5e9', weight: 4 }} 
+               pathOptions={{ color: '#39b0ff', weight: 4 }} 
             />
             
             {/* Start Marker */}
@@ -144,9 +148,9 @@ export default function TrackPlayback() {
             </Marker>
          </MapContainer>
 
-         {/* Playback Controls Overlay */}
-         <div className="absolute bottom-6 left-6 right-6 bg-white/90 backdrop-blur border border-gray-200 p-4 rounded-lg z-[400] flex flex-col gap-2 shadow-lg">
-            <div className="flex justify-between text-xs text-gray-500">
+         {/* Playback Controls Overlay - 蓝色风 */}
+         <div className="absolute bottom-6 left-6 right-6 bg-blue-900/70 backdrop-blur border border-blue-800 p-4 rounded-lg z-[400] flex flex-col gap-2 shadow-lg text-blue-100">
+            <div className="flex justify-between text-xs text-blue-200">
                <span>2024-07-29 00:00:00</span>
                <span>2024-07-29 23:59:59</span>
             </div>
@@ -156,12 +160,12 @@ export default function TrackPlayback() {
                max="100" 
                value={progress} 
                onChange={(e) => setProgress(Number(e.target.value))}
-               className="w-full h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-blue-600 [&::-webkit-slider-thumb]:rounded-full"
+               className="w-full h-1 bg-blue-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-3 [&::-webkit-slider-thumb]:h-3 [&::-webkit-slider-thumb]:bg-blue-400 [&::-webkit-slider-thumb]:rounded-full"
             />
             <div className="flex items-center justify-center gap-6 mt-2">
                <button 
                  onClick={handleStop}
-                 className="text-gray-600 hover:text-gray-900"
+                 className="text-blue-200 hover:text-white"
                >
                  <Square size={16} />
                </button>
@@ -171,7 +175,7 @@ export default function TrackPlayback() {
                >
                   {isPlaying ? <Pause size={20} /> : <Play size={20} className="ml-1" />}
                </button>
-               <select className="bg-transparent text-xs text-gray-600 border border-gray-300 rounded px-1 py-0.5 outline-none">
+               <select className="bg-blue-800 text-xs text-blue-100 border border-blue-700 rounded px-1 py-0.5 outline-none">
                   <option>1倍</option>
                   <option>2倍</option>
                   <option>4倍</option>
@@ -182,3 +186,4 @@ export default function TrackPlayback() {
     </div>
   );
 }
+// ...existing code...

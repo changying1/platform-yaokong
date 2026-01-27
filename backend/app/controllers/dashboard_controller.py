@@ -2,9 +2,8 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
-# 按你项目实际 get_db 路径调整：
-# 你之前的项目结构里很像是 app/core/database.py
 from app.core.database import get_db
+from app.core.security import get_current_user  # ✅ 新增：按你项目实际路径调整
 
 router = APIRouter(prefix="/api/dashboard", tags=["Dashboard"])
 
@@ -44,18 +43,29 @@ def dashboard_summary(db: Session = Depends(get_db)):
 
 
 @router.get("/branches")
-def list_branches(db: Session = Depends(get_db)):
+def list_branches(
+    db: Session = Depends(get_db),
+    user: dict = Depends(get_current_user),  # ✅ 新增：仅用于判断 HQ / BRANCH
+):
     """
     分公司列表：给前端地图展示使用
     前端需要 coord: [lng, lat]（经度在前）
     """
-    rows = db.execute(text("""
+    # ✅ 仅增加：总部/分部可见性控制（不改变返回结构）
+    where_sql = ""
+    params = {}
+    if user.get("role") == "BRANCH":
+        where_sql = "WHERE id = :bid"
+        params["bid"] = user.get("department_id")
+
+    rows = db.execute(text(f"""
         SELECT
           id, province, name, lng, lat, address, project, manager, phone,
           device_count, status, updated_at, remark
         FROM branches
+        {where_sql}
         ORDER BY id ASC
-    """)).mappings().all()
+    """), params).mappings().all()
 
     data = []
     for r in rows:
