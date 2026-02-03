@@ -201,3 +201,31 @@ export async function ptzStopControl(videoId: number): Promise<{ status: string 
   }
   return response.json();
 }
+
+// --- 新增：AI 监控控制接口 ---
+
+// 开启指定设备的 AI 监控
+// --- 找到 frontend/src/api/videoApi.ts 文件，在末尾添加以下内容 ---
+
+// 1. 开启 AI 监控
+export const startAIMonitoring = async (deviceId: string, rtspUrl: string, algoType: string = "helmet") => {
+  // 注意：这里假设你的后端运行在 localhost:8000，且 API_BASE_URL 已正确定义
+  // 如果 videoApi.ts 顶部已经定义了 API_BASE_URL，请直接使用它
+  // 如果没有，请手动替换为 'http://localhost:8000/api'
+  const response = await fetch(`http://127.0.0.1:9000/video/ai/start`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ device_id: deviceId, rtsp_url: rtspUrl, algo_type: algoType }),
+  });
+  return response.json();
+};
+
+// 2. 停止 AI 监控
+export const stopAIMonitoring = async (deviceId: string) => {
+  const response = await fetch(`http://127.0.0.1:9000/video/ai/stop?device_id=${deviceId}`, {
+    method: 'POST',
+  });
+  return response.json();
+};

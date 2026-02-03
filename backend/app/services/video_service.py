@@ -348,7 +348,7 @@ class VideoService:
         # 如果已经存在同名推流，先停止旧的
         self.stop_ffmpeg_stream(stream_name)
 
-        ffmpeg_path = r"C:\Users\DELL\Desktop\platform-shipin-yaokong\platfort-yaokong\ffmpeg-8.0.1-essentials_build\bin\ffmpeg.exe" 
+        ffmpeg_path = r"C:\Users\DELL\Desktop\platform-shipin-yaokong\platform-yaokong\ffmpeg-8.0.1-essentials_build\bin\ffmpeg.exe" 
         rtmp_url = f"rtmp://127.0.0.1:19350/live/{stream_name}"
         
         # V4 完美配置

@@ -21,4 +21,4 @@ class Device(Base):
     owner_id = Column(Integer, ForeignKey("users.id"))
     owner = relationship("User", back_populates="devices")
     
-    alarms = relationship("AlarmRecord", back_populates="device")
+    # alarms = relationship("AlarmRecord", back_populates="device")

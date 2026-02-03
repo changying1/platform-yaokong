@@ -43,6 +43,7 @@ app.mount("/static", StaticFiles(directory=static_dir), name="static")
 app.add_middleware(
     CORSMiddleware,
     # allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],  # 你的前端地址
+    allow_origins=["*"],  # 允许所有来源，开发时使用
     allow_origin_regex='.*',  # Allow all origins for development
     allow_credentials=True,
     allow_methods=["*"],  # 允许 GET/POST/PUT/DELETE/OPTIONS 等
@@ -75,4 +76,11 @@ if __name__ == "__main__":
     host = os.getenv("BACKEND_HOST", "127.0.0.1")
     port = int(os.getenv("BACKEND_PORT", 8000))
     
-    uvicorn.run(app, host=host, port=port)
+    # --- 修改部分开始 ---
+    try:
+        # 只保留这一个启动入口，并且放在 try 里面
+        uvicorn.run(app, host=host, port=port)
+    except KeyboardInterrupt:
+        # 专门捕获 Ctrl+C 中断信号
+        print("程序已成功手动停止，再见！")
+    # --- 修改部分结束 ---

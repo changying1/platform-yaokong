@@ -9,9 +9,28 @@ from app.services.video_service import VideoService
 import cv2
 import time
 import threading
+# --- 在现有的 import 语句下面添加 ---
+from app.services.ai_manager import ai_manager
+from pydantic import BaseModel
 
 router = APIRouter(prefix="/video", tags=["Video Surveillance"])
 service = VideoService()
+
+# --- 放在 router 定义之前或之后都可以，只要在下面的接口用到它之前 ---
+class AIMonitorRequest(BaseModel):
+    device_id: str
+    rtsp_url: str
+    algo_type: str = "helmet"
+
+@router.post("/ai/start")
+async def start_ai(req: AIMonitorRequest):
+    """开启 AI 监控"""
+    # --- 2. 传参给 manager ---
+    success = ai_manager.start_monitoring(req.device_id, req.rtsp_url, req.algo_type)
+    if success:
+        return {"code": 200, "message": f"AI监控已启动: {req.algo_type}"}
+    else:
+        return {"code": 400, "message": "启动失败或已在运行"}
 
 @router.post("/add_camera", response_model=VideoOut)
 def add_camera_dynamically(camera: CameraCreateRequest, db: Session = Depends(get_db)):
@@ -156,3 +175,24 @@ def ptz_stop(video_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"PTZ 停止失败: {e}")
+
+# --- 建议放在文件末尾 ---
+
+@router.post("/ai/start")
+async def start_ai(req: AIMonitorRequest):
+    """开启 AI 监控"""
+    # 注意：这里调用的是我们在 step 2 写的 ai_manager
+    success = ai_manager.start_monitoring(req.device_id, req.rtsp_url)
+    if success:
+        return {"code": 200, "message": "AI监控已启动"}
+    else:
+        return {"code": 400, "message": "启动失败或已在运行"}
+
+@router.post("/ai/stop")
+async def stop_ai(device_id: str):
+    """停止 AI 监控"""
+    success = ai_manager.stop_monitoring(device_id)
+    if success:
+        return {"code": 200, "message": "AI监控已停止"}
+    else:
+        return {"code": 400, "message": "停止失败或未运行"}

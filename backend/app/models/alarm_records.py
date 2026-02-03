@@ -20,7 +20,7 @@ class AlarmRecord(Base):
     recording_error = Column(String(255), nullable=True)
     
     # Relationships
-    device_id = Column(String(50), ForeignKey("devices.id"))
-    device = relationship("Device", back_populates="alarms")
+    device_id = Column(String(50), index=True)
+    # device = relationship("Device", back_populates="alarms")
     
     fence_id = Column(Integer, ForeignKey("electronic_fences.id"), nullable=True)

@@ -19,7 +19,7 @@ const config = {
     api_pass: '123456'
   },
   relay: {
-    ffmpeg: 'C:/Users/DELL/Desktop/platform-shipin-yaokong/platfort-yaokong/ffmpeg-8.0.1-essentials_build/bin/ffmpeg.exe',
+    ffmpeg: 'C:/Users/DELL/Desktop/platform-shipin-yaokong/platform-yaokong/ffmpeg-8.0.1-essentials_build/bin/ffmpeg.exe',
     tasks: []
   }
 };
